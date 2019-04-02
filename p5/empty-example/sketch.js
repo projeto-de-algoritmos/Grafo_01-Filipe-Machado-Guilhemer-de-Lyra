@@ -10,22 +10,16 @@ var debug;
 function setup() {
  // frameRate(10);
 
-jsScreen = createCanvas(800,500);
+  jsScreen = createCanvas(800,500);
 
- background(255);
-
-  
+  background(255); 
   slider = createSlider(1,300,100);
-  
-
   sliderValue = createP(slider.value());
 
   sliderValue.parent('#zoom');
   slider.parent('#zoom');
   //sliderValue.style("","");
-
   framerateText = createP(frameRate());
-
 
   grid = new Grid(100);
   graph = new Grafo();
@@ -33,6 +27,12 @@ jsScreen = createCanvas(800,500);
   
   jsScreen.parent('canvas');
 
+  graph.addVertex(0,100,100);
+  graph.addVertex(1,-100,150);
+  graph.addVertex(2,0,.100);
+  
+  graph.addLink(0,1);
+  graph.addLink(2,0);
 }
 
 function draw() {
@@ -43,13 +43,6 @@ function draw() {
  
   applyMatrix(1 / zoom, 0, 0, 1 / zoom, 0, 0);
   grid.show();
-  
-  graph.addVertex(0,100,100);
-  graph.addVertex(1,-100,150);
-  graph.addVertex(2,0,.100);
-  
-  graph.addLink(0,1);
-  graph.addLink(2,0);
 
   graph.showLink(0,1);
   graph.showLink(2,0);
