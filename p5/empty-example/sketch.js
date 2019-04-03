@@ -4,6 +4,15 @@ var grid;
 var zoom;
 var jsScreen;
 var zoomParagraph;
+var addButton;
+var graph;
+var inputX;
+var inputY;
+var selectVertex1;
+var selectVertex2;
+var addAresta;
+
+var i = 0;
 
 var debug;
 
@@ -19,13 +28,42 @@ function setup() {
   sliderValue.parent('#zoom');
   slider.parent('#zoom');
   //sliderValue.style("","");
-  framerateText = createP(frameRate());
+
 
   grid = new Grid(100);
   graph = new Graph();
   graph.createGraph();
 
-  jsScreen.parent('canvas');
+  addButton = createButton('Adicionar Vértice');
+  inputX = createInput('Posição X');
+  inputY = createInput('Posição Y');
+  addButton.parent('#addVertice');
+  inputX.parent('addVertice');
+  inputY.parent('addVertice');
+
+  addButton.mousePressed(function(){
+    graph.addVertex((graph.qtdVertex+1),inputX.value(),inputY.value());
+    while(i<graph.qtdVertex){
+      selectVertex1.option(i);
+      selectVertex2.option(i);
+      i++;
+    }
+  });
+
+  selectVertex1 = createSelect();
+  selectVertex2 = createSelect();
+  addAresta = createButton("Adicionar Aresta");
+  selectVertex1.option("Selecione");
+  selectVertex2.option("Selecione");
+  addAresta.parent('addAresta');
+  selectVertex1.parent('addAresta');
+  selectVertex2.parent('addAresta');
+
+  addAresta.mousePressed(function(){
+    graph.addLink(selectVertex1.value(), selectVertex2.value());
+  });
+
+  
 
   graph.addVertex(0, 100, 100);
   graph.addVertex(1, -100, 150);
@@ -33,6 +71,9 @@ function setup() {
 
   graph.addLink(0, 1);
   graph.addLink(2, 0);
+
+  jsScreen.parent('canvas');
+  framerateText = createP(frameRate());
 }
 
 function draw() {
@@ -43,6 +84,13 @@ function draw() {
   applyMatrix(1 / zoom, 0, 0, 1 / zoom, 0, 0);
   grid.show();
   graph.show();
+
+  for(vertex in graph.adjList){
+    let vertexPosX = graph.adjList[vertex].posX;
+    let vertexPosY = graph.adjList[vertex].posY;
+    textAlign(CENTER,CENTER);
+    text(vertex,vertexPosX,vertexPosY);
+  }
 
   framerateText.html("fps: " + frameRate());
   sliderValue.html("Zoom :" + slider.value() + "%");
@@ -71,6 +119,8 @@ function Grid(scale) {
 
 function Graph() {
 
+  this.qtdVertex = 0;
+
   function Vertex(positionX, positionY) {
     //Posições no eixo X e Y para representar o grafo graficamente
     this.posX = positionX;
@@ -86,7 +136,7 @@ function Graph() {
 
   this.addVertex = (index, positionX, positionY) => {
     //Adiciona o vertice depois de fazer todas as verificaçoes
-    let vertex = new Vertex(positionX, positionY);
+    let vertex = new Vertex(positionX, positionY);    
     this.adjList.push(vertex);
     this.qtdVertex = this.qtdVertex + 1;
   }
@@ -94,13 +144,14 @@ function Graph() {
   this.show = () => {
     var radius = 30;
     for (vertex in this.adjList) {
-      console.log('ue' + this.adjList[vertex].posX);
+     // console.log('ue' + this.adjList[vertex].posX);
       vertexPosX = this.adjList[vertex].posX;
       vertexPosY = this.adjList[vertex].posY;
       
+
       for (link in this.adjList[vertex].links) {
-        console.log('ma rapa'+JSON.stringify(this.adjList[vertex].links));
-        console.log('oxi'+link);
+    //    console.log('ma rapa'+JSON.stringify(this.adjList[vertex].links));
+    //    console.log('oxi'+link);
         var linkedVPosX = this.adjList[link].posX;
         var linkedVPosY = this.adjList[link].posY;
         strokeWeight(3);
@@ -111,6 +162,11 @@ function Graph() {
       strokeWeight(3);
       stroke(100);
       ellipse(vertexPosX, vertexPosY, radius, radius);
+      noStroke();
+     
+
+      
+      
     }
   }
 
