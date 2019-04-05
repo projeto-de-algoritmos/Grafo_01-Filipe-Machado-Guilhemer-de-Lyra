@@ -177,6 +177,7 @@ function Sidebar(){
   this.show = function(graph){
     
     var posFinaly;
+    var arrayVertex = new Array();
 
     textAlign(CENTER, CENTER);
     fill(16, 23, 44);
@@ -188,11 +189,12 @@ function Sidebar(){
     fill(255);
     text("Grafo ",xpos + xSpace, ySpace * 2);
     this.vertexPosY = ySpace* 2;
-    
+
+  
    for (var vertex of graph.adjList.keys()) {
       this.vertexPosX = xpos + xSpace*2;
       this.vertexPosY = this.vertexPosY+(ySpace);
-      text("Vertice "+vertex, this.vertexPosX, this.vertexPosY);
+      text("Vertice "+vertex, this.vertexPosX, this.vertexPosY);     
       line(this.vertexPosX-60,this.vertexPosY,this.vertexPosX-60,this.vertexPosY-20); //Linha vertical
       line(this.vertexPosX-60,this.vertexPosY,this.vertexPosX-35,this.vertexPosY);  //Linha horizontal
       for (var link of graph.adjList.get(vertex).links) {
