@@ -110,7 +110,7 @@ function setup() {
   grid = new Grid(100);
   graph = new Graph();
   graph.createGraph();
-
+  // graph.addVertex(100, 100);   graph.addVertex(-100, 150);   graph.addVertex(0, 0.1);   graph.addVertex(333,20);   graph.addVertex(40,180);    graph.addLink(0, 1);   graph.addLink(2, 0);   graph.addLink(0, 3);   graph.addLink(0, 4);
   buttons = new Buttons(graph);
   buttons.add_edge();
   buttons.add_vertex();
@@ -205,8 +205,7 @@ function Graph() {
 
   this.show = () => {
     var radius = 30;
-    // var pairs = new Set();
-    // var cnt = 0;
+    var pairs = new Set();
 
     for (var vertex of this.adjList.keys()) {
       vertexPosX = this.adjList.get(vertex).posX;
@@ -216,16 +215,16 @@ function Graph() {
       stroke(100);
 
       for (var link of this.adjList.get(vertex).links) {
-        // var arr = new Array([vertex, link]);
-        // arr.sort()
-        // console.log('entrou' + arr);
-        // if (pairs.has(arr) == false) {
-        // cnt++;
-        var linkedVPosX = this.adjList.get(link).posX;
-        var linkedVPosY = this.adjList.get(link).posY;
-        line(vertexPosX, vertexPosY, linkedVPosX, linkedVPosY);
-        //   pairs.add(arr);
-        // }
+        var arr = new Array();
+        arr.push(vertex)
+        arr.push(link);
+        arr.sort()
+        if (pairs.has(JSON.stringify(arr)) == false) {
+          pairs.add(JSON.stringify(arr));
+          var linkedVPosX = this.adjList.get(link).posX;
+          var linkedVPosY = this.adjList.get(link).posY;
+          line(vertexPosX, vertexPosY, linkedVPosX, linkedVPosY);
+        }
       }
 
       ellipse(vertexPosX, vertexPosY, radius, radius);
