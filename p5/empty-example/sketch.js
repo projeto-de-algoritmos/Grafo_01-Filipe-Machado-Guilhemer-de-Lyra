@@ -11,6 +11,7 @@ var inputY;
 var selectVertex1;
 var selectVertex2;
 var addAresta;
+var sidebar;
 
 var i = 0;
 
@@ -19,7 +20,7 @@ var debug;
 function setup() {
   // frameRate(10);
 
-  jsScreen = createCanvas(800, 500);
+  jsScreen = createCanvas(windowWidth, 500);
 
   background(255);
   slider = createSlider(1, 300, 100);
@@ -28,7 +29,7 @@ function setup() {
   sliderValue.parent("#zoom");
   slider.parent("#zoom");
   //sliderValue.style("","");
-
+  sidebar = new Sidebar();
   grid = new Grid(100);
   graph = new Graph();
   graph.createGraph();
@@ -86,9 +87,13 @@ function setup() {
   graph.addVertex(100, 100);
   graph.addVertex(-100, 150);
   graph.addVertex(0, 0.1);
+  graph.addVertex(333,20);
+  graph.addVertex(40,180);
 
   graph.addLink(0, 1);
   graph.addLink(2, 0);
+  graph.addLink(0, 3);
+  graph.addLink(0, 4);
 
   jsScreen.parent("canvas");
   framerateText = createP(frameRate());
@@ -97,6 +102,9 @@ function setup() {
 function draw() {
   zoom = slider.value() / 100;
   background(200);
+ // applyMatrix(1, 1,1,1, 1, 1);
+ 
+  sidebar.show(graph);
   translate(400, 250);
 
   applyMatrix(1 / zoom, 0, 0, 1 / zoom, 0, 0);
@@ -131,6 +139,54 @@ function Grid(scale) {
       }
     }
   };
+}
+
+function Sidebar(){
+  var xpos = 800;
+  var ypos = height;
+  var xpos2 = width-800;
+  var ypos2 = -windowHeight;
+  var xSpace = 65;
+  var ySpace = 30;
+  var vertexPosX;
+  var vertexPosY;
+
+  this.show = function(graph){
+    
+    var posFinaly;
+
+    textAlign(CENTER, CENTER);
+    fill(16, 23, 44);
+    textSize(15);
+    rect(xpos,ypos,xpos2,ypos2);
+    //stroke(255);
+    stroke(255);
+    strokeWeight(1);
+    fill(255);
+    text("Grafo ",xpos + xSpace, ySpace * 2);
+    this.vertexPosY = ySpace* 2;
+    
+   for (var vertex of graph.adjList.keys()) {
+      this.vertexPosX = xpos + xSpace*2;
+      this.vertexPosY = this.vertexPosY+(ySpace);
+      text("Vertice "+vertex, this.vertexPosX, this.vertexPosY);
+      line(this.vertexPosX-60,this.vertexPosY,this.vertexPosX-60,this.vertexPosY-20); //Linha vertical
+      line(this.vertexPosX-60,this.vertexPosY,this.vertexPosX-35,this.vertexPosY);  //Linha horizontal
+      for (var link of graph.adjList.get(vertex).links) {
+        this.vertexPosY = this.vertexPosY +20;
+      // text("Aresta ("+graph.adjList.get(link)+");", xpos + xSpace * 4, this.vertexPosY );
+       text("Aresta ("+link+");", xpos + xSpace * 3, this.vertexPosY );
+       line((xpos + xSpace * 3)-60,(this.vertexPosY),(xpos + xSpace * 3)-60,this.vertexPosY-20); //Linha vertical
+       line((xpos + xSpace * 3)-60,this.vertexPosY,(xpos + xSpace * 3)-40,this.vertexPosY); //Linha horizontal
+        //   pairs.add(arr);
+        // }
+        
+      } 
+      this.posFinaly = this.vertexPosY;   
+    }
+    line((xpos + xSpace*2)-60,ySpace* 2,(xpos + xSpace*2)-60,this.posFinaly);
+  }
+
 }
 
 function Graph() {
@@ -180,7 +236,7 @@ function Graph() {
     var radius = 30;
     // var pairs = new Set();
     // var cnt = 0;
-
+   fill(255);
     for (var vertex of this.adjList.keys()) {
       vertexPosX = this.adjList.get(vertex).posX;
       vertexPosY = this.adjList.get(vertex).posY;
@@ -204,6 +260,7 @@ function Graph() {
       ellipse(vertexPosX, vertexPosY, radius, radius);
       textAlign(CENTER, CENTER);
       noStroke();
+      stroke(1);
       text(vertex, vertexPosX, vertexPosY);
     }
   };
