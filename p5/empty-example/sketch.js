@@ -4,22 +4,100 @@ var grid;
 var zoom;
 var jsScreen;
 var zoomParagraph;
-var addButton;
 var graph;
-var inputX;
-var inputY;
-var selectVertex1;
-var selectVertex2;
-var addAresta;
-var sidebar;
-
 var i = 0;
 
 var debug;
 
-function setup() {
-  // frameRate(10);
+class Buttons {
+  constructor(grapho) {
+    this.graphico = grapho;
 
+    this.addVertex = createButton("Adicionar Vértice");
+    this.inputX = createInput("Posição X");
+    this.inputY = createInput("Posição Y");
+    this.addVertex.parent("#addVertice");
+    this.inputX.parent("addVertice");
+    this.inputY.parent("addVertice");
+
+    this.addEdge = createButton("Adicionar Aresta");
+    this.selectVertex1_add = createSelect();
+    this.selectVertex2_add = createSelect();
+    this.selectVertex1_add.option("Selecione");
+    this.selectVertex2_add.option("Selecione");
+    this.addEdge.parent("addAresta");
+    this.selectVertex1_add.parent("addAresta");
+    this.selectVertex2_add.parent("addAresta");
+
+    this.removeVertex = createButton("Remover Vértice");
+    this.delInput = createInput("Index");
+    this.removeVertex.parent("#removeVertice");
+    this.delInput.parent("removeVertice");
+
+    this.removeEdge = createButton("Remover Aresta");
+    this.selectVertex_remove = createSelect();
+    this.selectVertex_remove.option("Selecione");
+    this.removeEdge.parent("removeEdge");
+    this.selectVertex_remove.parent("removeEdge");
+  };
+
+  renew_add_edge_list() {
+    for (let vertex of buttons.graphico.adjList.keys()) {
+      buttons.selectVertex1_add.option(vertex);
+      buttons.selectVertex2_add.option(vertex);
+    }
+  }
+
+  
+  renew_remove_edge_list() {
+    var pairs = new Set();
+    for (var vertex of buttons.graphico.adjList.keys()) {
+      for (var link of buttons.graphico.adjList.get(vertex).links) {
+        var arr = new Array();
+        arr.push(vertex)
+        arr.push(link);
+        arr.sort()
+        if (pairs.has(JSON.stringify(arr)) == false) {
+          pairs.add(JSON.stringify(arr));
+        }
+      }
+    }
+    for (let pair of pairs) {
+      buttons.selectVertex_remove.option(pair);
+    }
+  }
+
+  add_vertex() {
+    buttons.addVertex.mousePressed(function (graphico) {
+      buttons.graphico.addVertex(parseInt(buttons.inputX.value()),
+        parseInt(buttons.inputY.value()));
+      buttons.renew_add_edge_list();
+    });
+  }
+
+  add_edge() {
+    buttons.addEdge.mousePressed(function () {
+      buttons.graphico.addLink(parseInt(buttons.selectVertex1_add.value()),
+        parseInt(buttons.selectVertex2_add.value()));
+      buttons.renew_remove_edge_list();
+    });
+  }
+
+  remove_vertex() {
+    buttons.removeVertex.mousePressed(function () {
+      buttons.graphico.deleteVertex(parseInt(buttons.delInput.value()));
+    });
+  }
+
+  remove_edge() {
+    buttons.removeEdge.mousePressed(function () {
+      let arr = JSON.parse(buttons.selectVertex_remove.value());
+      buttons.graphico.deleteEdge(arr[0], arr[1]);
+    });
+  }
+}
+
+function setup() {
   jsScreen = createCanvas(windowWidth, 500);
 
   background(255);
@@ -33,67 +111,12 @@ function setup() {
   grid = new Grid(100);
   graph = new Graph();
   graph.createGraph();
-
-  addButton = createButton("Adicionar Vértice");
-  inputX = createInput("Posição X");
-  inputY = createInput("Posição Y");
-  addButton.parent("#addVertice");
-  inputX.parent("addVertice");
-  inputY.parent("addVertice");
-
-  addButton.mousePressed(function() {
-    graph.addVertex(inputX.value(), inputY.value());
-    while (i < graph.qtdVertex) {
-      selectVertex1.option(i);
-      selectVertex2.option(i);
-      i++;
-    }
-  });
-
-  selectVertex1 = createSelect();
-  selectVertex2 = createSelect();
-  addAresta = createButton("Adicionar Aresta");
-  selectVertex1.option("Selecione");
-  selectVertex2.option("Selecione");
-  addAresta.parent("addAresta");
-  selectVertex1.parent("addAresta");
-  selectVertex2.parent("addAresta");
-
-  addAresta.mousePressed(function() {
-    graph.addLink(selectVertex1.value(), selectVertex2.value());
-  });
-
-  selectVertex1 = createSelect();
-  selectVertex2 = createSelect();
-  removeEdge = createButton("Remover Aresta");
-  selectVertex1.option("Selecione");
-  selectVertex2.option("Selecione");
-  removeEdge.parent("removeEdge");
-  selectVertex1.parent("removeEdge");
-  selectVertex2.parent("removeEdge");
-
-  removeEdge.mousePressed(function() {
-    graph.deleteEdge(selectVertex1.value(), selectVertex2.value());
-  });
-
-  removeButton = createButton("Remover Vértice");
-  delInput = createInput("Index");
-  removeButton.parent("#removeVertice");
-  delInput.parent("removeVertice");
-  removeButton.mousePressed(function() {
-    graph.deleteVertex(delInput.value());
-  });
-
-  graph.addVertex(100, 100);
-  graph.addVertex(-100, 150);
-  graph.addVertex(0, 0.1);
-  graph.addVertex(333,20);
-  graph.addVertex(40,180);
-
-  graph.addLink(0, 1);
-  graph.addLink(2, 0);
-  graph.addLink(0, 3);
-  graph.addLink(0, 4);
+  // graph.addVertex(100, 100);   graph.addVertex(-100, 150);   graph.addVertex(0, 0.1);   graph.addVertex(333,20);   graph.addVertex(40,180);    graph.addLink(0, 1);   graph.addLink(2, 0);   graph.addLink(0, 3);   graph.addLink(0, 4);
+  buttons = new Buttons(graph);
+  buttons.add_edge();
+  buttons.add_vertex();
+  buttons.remove_edge();
+  buttons.remove_vertex();
 
   jsScreen.parent("canvas");
   framerateText = createP(frameRate());
@@ -234,9 +257,9 @@ function Graph() {
 
   this.show = () => {
     var radius = 30;
-    // var pairs = new Set();
-    // var cnt = 0;
-   fill(255);
+    fill(255);
+    var pairs = new Set();
+
     for (var vertex of this.adjList.keys()) {
       vertexPosX = this.adjList.get(vertex).posX;
       vertexPosY = this.adjList.get(vertex).posY;
@@ -245,16 +268,16 @@ function Graph() {
       stroke(100);
 
       for (var link of this.adjList.get(vertex).links) {
-        // var arr = new Array([vertex, link]);
-        // arr.sort()
-        // console.log('entrou' + arr);
-        // if (pairs.has(arr) == false) {
-        // cnt++;
-        var linkedVPosX = this.adjList.get(link).posX;
-        var linkedVPosY = this.adjList.get(link).posY;
-        line(vertexPosX, vertexPosY, linkedVPosX, linkedVPosY);
-        //   pairs.add(arr);
-        // }
+        var arr = new Array();
+        arr.push(vertex)
+        arr.push(link);
+        arr.sort()
+        if (pairs.has(JSON.stringify(arr)) == false) {
+          pairs.add(JSON.stringify(arr));
+          var linkedVPosX = this.adjList.get(link).posX;
+          var linkedVPosY = this.adjList.get(link).posY;
+          line(vertexPosX, vertexPosY, linkedVPosX, linkedVPosY);
+        }
       }
 
       ellipse(vertexPosX, vertexPosY, radius, radius);
@@ -266,6 +289,8 @@ function Graph() {
   };
 
   this.addLink = (vertex, linkedVertex) => {
+    vertex = parseInt(vertex);
+    linkedVertex = parseInt(linkedVertex);
     this.adjList.get(vertex).links.push(linkedVertex);
     this.adjList.get(linkedVertex).links.push(vertex);
   };
