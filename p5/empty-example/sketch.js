@@ -42,14 +42,29 @@ class Buttons {
   };
 
   renew_add_edge_list() {
+    this.selectVertex1_add.remove();
+    this.selectVertex2_add.remove();
+
+    this.selectVertex1_add = createSelect();
+    this.selectVertex2_add = createSelect();
+
+    this.selectVertex1_add.option("Selecione");
+    this.selectVertex2_add.option("Selecione");
+    this.selectVertex1_add.parent("addAresta");
+    this.selectVertex2_add.parent("addAresta");
+
     for (let vertex of buttons.graphico.adjList.keys()) {
       buttons.selectVertex1_add.option(vertex);
       buttons.selectVertex2_add.option(vertex);
     }
   }
 
-  
   renew_remove_edge_list() {
+    this.selectVertex_remove.remove();
+    this.selectVertex_remove = createSelect();
+    this.selectVertex_remove.option("Selecione");
+    this.selectVertex_remove.parent("removeEdge");
+
     var pairs = new Set();
     for (var vertex of buttons.graphico.adjList.keys()) {
       for (var link of buttons.graphico.adjList.get(vertex).links) {
@@ -68,7 +83,7 @@ class Buttons {
   }
 
   add_vertex() {
-    buttons.addVertex.mousePressed(function (graphico) {
+    buttons.addVertex.mousePressed(function () {
       buttons.graphico.addVertex(parseInt(buttons.inputX.value()),
         parseInt(buttons.inputY.value()));
       buttons.renew_add_edge_list();
@@ -86,6 +101,7 @@ class Buttons {
   remove_vertex() {
     buttons.removeVertex.mousePressed(function () {
       buttons.graphico.deleteVertex(parseInt(buttons.delInput.value()));
+      buttons.renew_add_edge_list();
     });
   }
 
@@ -93,8 +109,27 @@ class Buttons {
     buttons.removeEdge.mousePressed(function () {
       let arr = JSON.parse(buttons.selectVertex_remove.value());
       buttons.graphico.deleteEdge(arr[0], arr[1]);
+      buttons.renew_remove_edge_list();
     });
   }
+}
+
+function sample_data(graph) {
+  graph.addVertex(0, 0);
+  graph.addVertex(100, 100);
+  graph.addVertex(100, -100);
+  graph.addVertex(-100, 100);
+  graph.addVertex(-100, -100);
+  graph.addVertex(-60, 20);
+  graph.addLink(0, 1);
+  graph.addLink(0, 2);
+  graph.addLink(0, 3);
+  graph.addLink(0, 4);
+  graph.addLink(5, 4);
+  graph.addLink(5, 3);
+  graph.addLink(5, 1);
+  graph.addLink(4, 3);
+  graph.addLink(1, 3);
 }
 
 function setup() {
@@ -111,12 +146,17 @@ function setup() {
   grid = new Grid(100);
   graph = new Graph();
   graph.createGraph();
-  // graph.addVertex(100, 100);   graph.addVertex(-100, 150);   graph.addVertex(0, 0.1);   graph.addVertex(333,20);   graph.addVertex(40,180);    graph.addLink(0, 1);   graph.addLink(2, 0);   graph.addLink(0, 3);   graph.addLink(0, 4);
+
+  sample_data(graph);
+
   buttons = new Buttons(graph);
   buttons.add_edge();
   buttons.add_vertex();
   buttons.remove_edge();
   buttons.remove_vertex();
+  buttons.renew_add_edge_list();
+  buttons.renew_remove_edge_list();
+
 
   jsScreen.parent("canvas");
   framerateText = createP(frameRate());
@@ -125,8 +165,8 @@ function setup() {
 function draw() {
   zoom = slider.value() / 100;
   background(200);
- // applyMatrix(1, 1,1,1, 1, 1);
- 
+  // applyMatrix(1, 1,1,1, 1, 1);
+
   sidebar.show(graph);
   translate(400, 250);
 
@@ -164,52 +204,56 @@ function Grid(scale) {
   };
 }
 
-function Sidebar(){
+function Sidebar() {
   var xpos = 800;
   var ypos = height;
-  var xpos2 = width-800;
+  var xpos2 = width - 800;
   var ypos2 = -windowHeight;
-  var xSpace = 65;
-  var ySpace = 30;
-  var vertexPosX;
-  var vertexPosY;
+  var xPad = 65;
+  var yPad = 30;
+  var base_x = xpos + xPad;
+  var base_y = yPad * 2;
 
-  this.show = function(graph){
-    
-    var posFinaly;
-    var arrayVertex = new Array();
-
+  this.show = function (graph) {
     textAlign(CENTER, CENTER);
     fill(16, 23, 44);
     textSize(15);
-    rect(xpos,ypos,xpos2,ypos2);
-    //stroke(255);
+    rect(xpos, ypos, xpos2, ypos2);
     stroke(255);
     strokeWeight(1);
     fill(255);
-    text("Grafo ",xpos + xSpace, ySpace * 2);
-    this.vertexPosY = ySpace* 2;
+    text("Grafo ", base_x, base_y);
 
-  
-   for (var vertex of graph.adjList.keys()) {
-      this.vertexPosX = xpos + xSpace*2;
-      this.vertexPosY = this.vertexPosY+(ySpace);
-      text("Vertice "+vertex, this.vertexPosX, this.vertexPosY);     
-      line(this.vertexPosX-60,this.vertexPosY,this.vertexPosX-60,this.vertexPosY-20); //Linha vertical
-      line(this.vertexPosX-60,this.vertexPosY,this.vertexPosX-35,this.vertexPosY);  //Linha horizontal
+    current_x = base_x+50;
+    current_y = base_y;
+
+    for (var vertex of graph.adjList.keys()) {
+      current_y += yPad;
+
+      if (current_y > 440) {
+        current_x += xPad+200;
+        current_y = yPad * 3;
+      }
+
+      text("Vertice " + vertex, current_x, current_y);
+      if (current_y != yPad*3) {
+        line(current_x - 60, current_y, current_x - 60, current_y - 130); //Linha vertical
+      } else {
+        line(current_x - 60, current_y, current_x - 60, current_y - 20); //Linha vertical
+      }
+      line(current_x - 60, current_y, current_x - 35, current_y);  //Linha horizontal
+
       for (var link of graph.adjList.get(vertex).links) {
-        this.vertexPosY = this.vertexPosY +20;
-      // text("Aresta ("+graph.adjList.get(link)+");", xpos + xSpace * 4, this.vertexPosY );
-       text("Aresta ("+link+");", xpos + xSpace * 3, this.vertexPosY );
-       line((xpos + xSpace * 3)-60,(this.vertexPosY),(xpos + xSpace * 3)-60,this.vertexPosY-20); //Linha vertical
-       line((xpos + xSpace * 3)-60,this.vertexPosY,(xpos + xSpace * 3)-40,this.vertexPosY); //Linha horizontal
-        //   pairs.add(arr);
-        // }
-        
-      } 
-      this.posFinaly = this.vertexPosY;   
+        current_y += 20;
+        text("Aresta (" + link + ");", current_x + xPad+10, current_y);
+        line(current_x, current_y, current_x, current_y - 20); //Linha vertical
+        line(current_x+30, current_y, current_x, current_y); //Linha horizontal
+
+      }
+
+      this.posFinaly = current_y;
     }
-    line((xpos + xSpace*2)-60,ySpace* 2,(xpos + xSpace*2)-60,this.posFinaly);
+    // line((current_x) - 60, yPad * 2, (current_x) - 60, this.posFinaly);
   }
 
 }
@@ -234,7 +278,7 @@ function Graph() {
     //Adiciona o vertice depois de fazer todas as verificaçoes
     let vertex = new Vertex(positionX, positionY);
     this.adjList.set(this.qtdVertex, vertex);
-    this.qtdVertex = this.qtdVertex + 1;
+    this.qtdVertex++;
   };
 
   this.deleteVertex = key => {
@@ -244,6 +288,7 @@ function Graph() {
       var idx = this.adjList.get(vertex).links.indexOf(key);
       this.adjList.get(vertex).links.splice(idx, 1);
     }
+    this.qtdVertex--;
   };
 
   this.deleteEdge = (key1, key2) => {
@@ -279,6 +324,12 @@ function Graph() {
           var linkedVPosX = this.adjList.get(link).posX;
           var linkedVPosY = this.adjList.get(link).posY;
           line(vertexPosX, vertexPosY, linkedVPosX, linkedVPosY);
+          push()
+          var angle = atan2(vertexPosY - linkedVPosY, vertexPosX - linkedVPosX);
+          translate(linkedVPosX, linkedVPosY);
+          rotate(angle-HALF_PI);
+          triangle(-20*0.5, 20, 20*0.5, 20, 0, -20/2);
+          pop();
         }
       }
 
