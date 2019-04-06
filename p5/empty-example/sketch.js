@@ -39,6 +39,9 @@ class Buttons {
     this.selectVertex_remove.option("Selecione");
     this.removeEdge.parent("removeEdge");
     this.selectVertex_remove.parent("removeEdge");
+
+    this.checkBipart = createButton("Checar se é Bipartido");
+    this.checkBipart.parent("checkBipart")
   };
 
   renew_add_edge_list() {
@@ -112,6 +115,16 @@ class Buttons {
       buttons.renew_remove_edge_list();
     });
   }
+
+  check_bipart() {
+    buttons.checkBipart.mousePressed(function () {
+      if (buttons.graphico.isBipartite() === true) {
+        alert("É Bipartido!");
+      } else {
+        alert("Não é Bipartido!")
+      }
+    });
+  }
 }
 
 function sample_data(graph) {
@@ -156,6 +169,7 @@ function setup() {
   buttons.remove_vertex();
   buttons.renew_add_edge_list();
   buttons.renew_remove_edge_list();
+  buttons.check_bipart();
 
 
   jsScreen.parent("canvas");
@@ -265,7 +279,7 @@ function Graph() {
     //Posições no eixo X e Y para representar o grafo graficamente
     this.posX = positionX;
     this.posY = positionY;
-
+    this.color = 0;
     //Representar o grafo por vetor de listas de adjacencia
     this.links = new Array();
   }
@@ -302,6 +316,34 @@ function Graph() {
     this.adjList.get(key2).links.splice(idx2, 1);
   };
 
+  this.bfs = (color, node) => {
+    var queue = [];
+    queue.push(node);
+    color[node] = 1;
+    while (queue.length > 0) {
+      var u = queue.shift();
+      for (var v of this.adjList.get(u).links) {
+        if(color[v] == 0) {
+          color[v] = 3 - color[u];
+          this.adjList.get(v).color = color[v];
+          queue.push(v);
+        } else if (color[v] == color[u]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  this.isBipartite = () => {
+    color = new Array(this.qtdVertex).fill(0);
+    for (let u = 1; u <= this.qtdVertex; ++u)
+      if (color[u] == 0 && !this.bfs(color, u))
+        return false;
+    
+    return true;
+  }
+
   this.show = () => {
     var radius = 30;
     fill(255);
@@ -333,10 +375,19 @@ function Graph() {
         }
       }
 
+      if (this.adjList.get(vertex).color === 1) {
+        fill(12,79,166);
+      } else if (this.adjList.get(vertex).color === 2) {
+        fill(166,12,12);
+      } else {
+        fill(255);
+      }
+
       ellipse(vertexPosX, vertexPosY, radius, radius);
       textAlign(CENTER, CENTER);
-      noStroke();
       stroke(1);
+      fill(220);
+      strokeWeight(3); 
       text(vertex, vertexPosX, vertexPosY);
     }
   };
