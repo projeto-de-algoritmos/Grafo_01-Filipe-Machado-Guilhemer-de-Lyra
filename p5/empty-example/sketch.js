@@ -182,7 +182,7 @@ function draw() {
   // applyMatrix(1, 1,1,1, 1, 1);
 
   sidebar.show(graph);
-  translate(400, 250);
+  translate(dragX, dragY);
 
   applyMatrix(1 / zoom, 0, 0, 1 / zoom, 0, 0);
   grid.show();
@@ -191,6 +191,24 @@ function draw() {
   framerateText.html("fps: " + frameRate());
   sliderValue.html("Zoom :" + slider.value() + "%");
 }
+
+var dragX = 400;
+var dragY = 250;
+var mousex1;
+var mousey1;
+var mousex2;
+var mousey2;
+function mousePressed(){
+  mousex1 = mouseX;
+  mousey1 = mouseY;
+  }
+function mouseReleased(){
+  mousex2 = mouseX;
+  mousey2 = mouseY;
+  dragX = dragX + (mousex1-mousex2);
+  dragY = dragY + (mousey1-mousey2);
+}
+  
 
 function Grid(scale) {
   this.scale = scale;
