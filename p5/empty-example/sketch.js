@@ -160,7 +160,7 @@ function setup() {
   graph = new Graph();
   graph.createGraph();
 
-  sample_data(graph);
+  //sample_data(graph);
 
   buttons = new Buttons(graph);
   buttons.add_edge();
@@ -414,6 +414,6 @@ function Graph() {
     vertex = parseInt(vertex);
     linkedVertex = parseInt(linkedVertex);
     this.adjList.get(vertex).links.push(linkedVertex);
-    this.adjList.get(linkedVertex).links.push(vertex);
+    //this.adjList.get(linkedVertex).links.push(vertex); 
   };
 }
